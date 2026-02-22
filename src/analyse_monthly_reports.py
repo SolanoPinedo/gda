@@ -47,7 +47,7 @@ def process_data(df, cols_to_analyze, id_cols):
 
     return df_monthly, df_annual
 
-def plot_interactive_data(df, column_to_plot):
+def plot_interactive_data(df, column_to_plot, file_path):
 
     # Create subplots
     fig = make_subplots(
@@ -85,7 +85,7 @@ def plot_interactive_data(df, column_to_plot):
         barmode='group',
         legend_title="Meses"
     )
-    fig.show()
+    fig.write_html(file_path)
 
 def filter_maintenance_data(df, centers=None, buildings=None):
     filtered_df = df.copy()
@@ -107,9 +107,8 @@ def filter_maintenance_data(df, centers=None, buildings=None):
     return filtered_df
 
 def main():
-    path = "/home/sergio/Documents/telmex/caltraf/DownloadsCalTraf2025" # Update this path
+    path = "data/data" # Update this path
     df = read_files_in_dir(path)
-    breakpoint()
     cm = 'CM ABASTOS'
 
 
@@ -119,7 +118,8 @@ def main():
 
 
     df_m, df_a = process_data(df, cols_to_sum, ids)
-    plot_interactive_data(df_m, cols_to_sum[0])
+    os.makedirs("docs", exist_ok=True)
+    plot_interactive_data(df_m, cols_to_sum[0], "docs/index.html")
     return df_m, df_a
 
 if __name__ == "__main__":
