@@ -47,35 +47,59 @@ def process_data(df, cols_to_analyze, id_cols):
 
     return df_monthly, df_annual
 
-def plot_interactive_data(df, column_to_plot, file_path):
-
-    # Create subplots
+def plot_interactive_data(df, columns_to_plot, file_path):
     fig = make_subplots(
         rows=2, cols=1,
         subplot_titles=("Escala lineal", "Escala logarítmica (permite ver valores pequeños)"),
         vertical_spacing=0.12
     )
 
-    # Get unique months for the dropdown
     months = sorted(df['month'].unique())
 
-    # Add traces for each month so they can be toggled
-    for m in months:
-        month_df = df[df['month'] == m]
+    # Add traces for all columns, but only make the first set visible
+    for i, col in enumerate(columns_to_plot):
+        for m in months:
+            month_df = df[df['month'] == m]
+            visible = True if i == 0 else False
+            # Linear Trace
+            fig.add_trace(
+                go.Bar(x=month_df['EDIFICIO'], y=month_df[col], name=f"{m}",
+                       hovertext=month_df['CLLI_REAL'], visible=visible),
+                row=1, col=1
+            )
+            # Log Trace
+            fig.add_trace(
+                go.Bar(x=month_df['EDIFICIO'], y=month_df[col], name=f"{m}",
+                       showlegend=False, hovertext=month_df['CLLI_REAL'], visible=visible),
+                row=2, col=1
+            )
 
-        # Linear Trace
-        fig.add_trace(
-            go.Bar(x=month_df['EDIFICIO'], y=month_df[column_to_plot], 
-                   name=f"{m}", hovertext=month_df['CLLI_REAL']),
-            row=1, col=1
-        )
+    # Create the dropdown menu
+    buttons = []
+    for i, col in enumerate(columns_to_plot):
+        visibility = [False] * (len(columns_to_plot) * len(months) * 2)
+        for j in range(len(months) * 2):
+            visibility[i * len(months) * 2 + j] = True
+        
+        buttons.append(dict(
+            label=col,
+            method="update",
+            args=[{"visible": visibility}]
+        ))
 
-        # Log Trace (linked to same legend)
-        fig.add_trace(
-            go.Bar(x=month_df['EDIFICIO'], y=month_df[column_to_plot], 
-                   name=f"{m}", showlegend=False, hovertext=month_df['CLLI_REAL']),
-            row=2, col=1
-        )
+    fig.update_layout(
+        updatemenus=[dict(
+            active=0,
+            buttons=buttons,
+            direction="down",
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=0.1,
+            xanchor="left",
+            y=1.1,
+            yanchor="top"
+        )]
+    )
 
     # Formatting
     fig.update_yaxes(type="log", row=2, col=1)
@@ -86,6 +110,7 @@ def plot_interactive_data(df, column_to_plot, file_path):
         legend_title="Meses"
     )
     fig.write_html(file_path)
+
 
 def filter_maintenance_data(df, centers=None, buildings=None):
     filtered_df = df.copy()
@@ -113,13 +138,28 @@ def main():
 
 
     df = filter_maintenance_data(df, centers=cm, buildings=None)
-    cols_to_sum = ['Bloi'] # Replace with your numeric column name
+    cols_to_sum = [
+        'A.- Cob',
+        'B.- NC',
+        'C.- OC',
+        'D.- INC',
+        'E.- TNP',
+        'F.- Intentos',
+        'Paso',
+        'Bloi',
+        'Bloe',
+        'FTS',
+        'FTE',
+        'OPR',
+        'Vacantes',
+        'Falla Tecnica'
+    ]
     ids = ['CLLI_REAL', 'EDIFICIO', 'CENTRO DE MANTENIMIENTO']
 
 
     df_m, df_a = process_data(df, cols_to_sum, ids)
     os.makedirs("docs", exist_ok=True)
-    plot_interactive_data(df_m, cols_to_sum[0], "docs/index.html")
+    plot_interactive_data(df_m, cols_to_sum, "docs/index.html")
     return df_m, df_a
 
 if __name__ == "__main__":
