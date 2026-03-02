@@ -81,7 +81,7 @@ function App() {
 
         const allData: DataRow[] = [];
         for (const fileName of fileNames) {
-          const response = await fetch(`/data/${fileName}.json`);
+          const response = await fetch(`${import.meta.env.BASE_URL}data/${fileName}.json`);
           if (!response.ok) {
             console.warn(`File not found: ${fileName}.json`);
             continue;
