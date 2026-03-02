@@ -23,14 +23,20 @@ const Chart: React.FC<ChartProps> = ({ data, column }) => {
         };
       });
 
-      const layout = {
-        title: `Visualización para la columna: ${column}`,
+      const layout: any = {
+        title: {
+          text: `Visualización para la columna: ${column}`,
+        },
         barmode: 'group',
         xaxis: {
-          title: 'Edificio',
+          title: {
+            text: 'Edificio',
+          },
         },
         yaxis: {
-          title: column,
+          title: {
+            text: column,
+          },
         },
         paper_bgcolor: '#1f2937', // bg-gray-800
         plot_bgcolor: '#1f2937', // bg-gray-800
