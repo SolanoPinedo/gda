@@ -10,8 +10,4 @@ export default defineConfig({
     nodePolyfills(),
   ],
   base: '/gda/',
-  build: {
-    outDir: path.resolve(__dirname, '../docs'),
-    emptyOutDir: true, // This will clear the docs folder before building
-  }
 })
